@@ -1,0 +1,14 @@
+services:
+  custom-scraping:
+    build: ./custom-scraping
+    ports:
+      - "8002:8002"
+    environment:
+      - SCRAPING_SERVICE_BASE_URL=http://scraping-service:8001
+    depends_on:
+      scraping-service:
+        condition: service_started
+
+  scraping-service:
+    build: ./scraping-service
+
