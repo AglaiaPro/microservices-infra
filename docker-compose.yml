@@ -4,11 +4,32 @@ services:
     ports:
       - "8002:8002"
     environment:
-      - SCRAPING_SERVICE_BASE_URL=http://scraping-service:8001
+      MONGO_URI: ${MONGO_URI:-mongodb://mongo:27017}
+      OPENAI_KEY: ${OPENAI_KEY:-}
+      SCRAPING_SERVICE_URL: http://scraping-service:8001
+      TEST_COMPANY_LIMIT: ${TEST_COMPANY_LIMIT:-3}
+      COMPANY_SCRAPE_CONCURRENCY: ${CUSTOM_COMPANY_SCRAPE_CONCURRENCY:-3}
     depends_on:
-      scraping-service:
-        condition: service_started
+      - mongo
+      - scraping-service
 
   scraping-service:
     build: ./scraping-service
+    ports:
+      - "8001:8001"
+    environment:
+      MONGO_URI: ${MONGO_URI:-mongodb://mongo:27017}
+      MAX_PAGES: ${MAX_PAGES:-2}
+      COMPANY_SCRAPE_CONCURRENCY: ${SCRAPING_COMPANY_SCRAPE_CONCURRENCY:-3}
+    depends_on:
+      - mongo
 
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
